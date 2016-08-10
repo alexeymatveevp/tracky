@@ -14,9 +14,6 @@ import java.util.Date;
 @SpringBootApplication
 public class TrackyApplication implements CommandLineRunner {
 
-	@Autowired
-	TrackyRepo trackyRepo;
-
 	public static void main(String[] args) {
 		ConfigurableApplicationContext ctx = SpringApplication.run(TrackyApplication.class, args);
 //		String[] beanNames = ctx.getBeanDefinitionNames();

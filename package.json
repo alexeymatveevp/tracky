@@ -1,0 +1,10 @@
+{
+  "name": "tracky-ui",
+  "author": "Alexey Matveev",
+  "version": "0.0.1",
+  "license": "MIT",
+  "description": "Tracky is an app for time management, life logging and keeping life history of events",
+  "dependencies": {
+    "material-ui-build": "0.16.0-alpha"
+  }
+}

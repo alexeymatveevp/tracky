@@ -4,17 +4,20 @@ buildscript {
 	}
 	repositories {
 		mavenCentral()
-		maven { url "https://repo.spring.io/snapshot" }
-		maven { url "https://repo.spring.io/milestone" }
+        jcenter()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "com.moowork.gradle:gradle-node-plugin:0.13"
 	}
 }
 
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
+apply plugin: 'com.moowork.node'
 
 jar {
 	baseName = 'tracky'
@@ -28,7 +31,6 @@ repositories {
 	maven { url "https://repo.spring.io/snapshot" }
 	maven { url "https://repo.spring.io/milestone" }
 }
-
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
@@ -44,4 +46,8 @@ dependencyManagement {
 	imports {
 		mavenBom "org.springframework.boot.experimental:spring-boot-dependencies-web-reactive:0.1.0.BUILD-SNAPSHOT"
 	}
+}
+
+springBoot {
+    executable = true
 }
