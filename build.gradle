@@ -22,6 +22,11 @@ apply plugin: 'com.moowork.node'
 apply plugin: 'application'
 mainClassName = "com.crispysoft.tracky.TrackyApplication"
 
+apply plugin: 'spring-boot'
+springBoot {
+    executable = true
+}
+
 jar {
 	baseName = 'tracky'
 	version = '0.1-SNAPSHOT'
