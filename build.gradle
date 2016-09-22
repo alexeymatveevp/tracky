@@ -19,6 +19,9 @@ apply plugin: 'idea'
 apply plugin: 'spring-boot'
 apply plugin: 'com.moowork.node'
 
+apply plugin: 'application'
+mainClassName = "com.crispysoft.tracky.TrackyApplication"
+
 jar {
 	baseName = 'tracky'
 	version = '0.1-SNAPSHOT'
