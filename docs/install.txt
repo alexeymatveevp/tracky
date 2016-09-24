@@ -1,7 +1,9 @@
 # create a symlink for a linux service
-ln -s /root/tracky/build/libs/*.jar /etc/init.d/foody
+ln -s /root/tracky/build/libs/*.jar /etc/init.d/tracky
 
-and then
+# build jar
+/root/tracky/gradlew clean assemble
 
-$ service foody start
-$ service foody stop
+# and then
+$ service tracky start
+$ service tracky stop
