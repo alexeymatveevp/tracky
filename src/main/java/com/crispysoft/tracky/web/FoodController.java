@@ -14,7 +14,6 @@ import java.util.List;
 /**
  * Created by kristina on 22.09.2016.
  */
-@CrossOrigin
 @RestController
 public class FoodController {
 
