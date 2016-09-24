@@ -2,7 +2,6 @@ var app = angular.module('app', []);
 app.controller('ctrl', function($scope, $http) {
     $scope.personNames = ['alex', 'kristino4ka'];
     $scope.endpoints = ['http://localhost:8080', 'http://91.240.84.2:8080', 'http://192.168.10.22:8080', 'http://192.168.10.21:8080'];
-    $scope.endpoint = 'http://localhost:8080';
 
     $scope.putFoody = function() {
       var request = {
@@ -26,14 +25,16 @@ app.controller('ctrl', function($scope, $http) {
       //   console.log(res);
       //   $scope.refreshFoodies();
       // });
-      $http.put($scope.endpoint + '/foody', request).then(function(res) {
+      var prefix = $scope.endpoint ? $scope.endpoint : '';
+      $http.put(prefix + '/foody', request).then(function(res) {
         console.log(res);
         $scope.refreshFoodies();
       });
     }
 
     $scope.refreshFoodies = function() {
-      $http.get($scope.endpoint + '/foodies').then(function(res) {
+      var prefix = $scope.endpoint ? $scope.endpoint : '';
+      $http.get(prefix + '/foodies').then(function(res) {
         $scope.foodies = res.data;
       })
     }

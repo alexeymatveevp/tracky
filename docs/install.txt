@@ -1,6 +1,9 @@
 # create a symlink for a linux service
 ln -s /root/tracky/build/libs/*.jar /etc/init.d/tracky
 
+# git update in /root/tracky dir
+git pull origin master
+
 # build jar
 /root/tracky/gradlew clean assemble
 
