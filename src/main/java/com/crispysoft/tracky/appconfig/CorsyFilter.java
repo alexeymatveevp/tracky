@@ -1,4 +1,4 @@
-package com.crispysoft.tracky;
+package com.crispysoft.tracky.appconfig;
 
 import org.springframework.stereotype.Component;
 
