@@ -42,7 +42,7 @@ repositories {
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
-	compile('org.springframework.boot.experimental:spring-boot-starter-web-reactive')
+//	compile('org.springframework.boot.experimental:spring-boot-starter-web-reactive')
 	compile('org.springframework.boot:spring-boot-starter-jersey')
 	compile('org.springframework.boot:spring-boot-starter-websocket')
 	testCompile('org.springframework.boot:spring-boot-starter-test')

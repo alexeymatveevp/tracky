@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * Created by kristina on 22.09.2016.
  */
+@CrossOrigin
 @RestController
 public class FoodController {
 
@@ -26,16 +27,12 @@ public class FoodController {
     @Autowired
     ProductRepo productRepo;
 
-    @RequestMapping(value = "/foody", method = RequestMethod.GET)
-    public void putFoody(@RequestParam("name") String name,
-                         @RequestParam("person") String person,
-                         @RequestParam(value = "date", required = false) Date date,
-                         @RequestParam(value = "weight", required = false) Double weight) {
-        Foody foodEntry = new Foody(name, person, date, weight);
-        if (date == null) {
-            foodEntry.setDate(new Date());
+    @RequestMapping(value = "/foody", method = RequestMethod.PUT)
+    public void putFoody(@RequestBody Foody food) {
+        if (food.getDate()== null) {
+            food.setDate(new Date());
         }
-        foodyRepo.save(foodEntry);
+        foodyRepo.save(food);
     }
 
     @RequestMapping(value = "/foodies", method = RequestMethod.GET)
