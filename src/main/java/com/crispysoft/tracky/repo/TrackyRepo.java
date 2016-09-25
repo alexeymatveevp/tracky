@@ -8,5 +8,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  * Date: 10.08.2016
  * Time: 21:10
  */
-public interface TrackyRepo extends MongoRepository<Tracky, Long> {
+public interface TrackyRepo extends MongoRepository<Tracky, String> {
 }

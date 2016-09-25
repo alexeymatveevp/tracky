@@ -45,6 +45,7 @@ dependencies {
 //	compile('org.springframework.boot.experimental:spring-boot-starter-web-reactive')
 	compile('org.springframework.boot:spring-boot-starter-jersey')
 	compile('org.springframework.boot:spring-boot-starter-websocket')
+	compile('joda-time:joda-time')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
 	testCompile("junit:junit")

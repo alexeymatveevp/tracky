@@ -1,5 +1,7 @@
 package com.crispysoft.tracky.appconfig;
 
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
@@ -16,6 +18,7 @@ import java.io.IOException;
  * Time: 14:06
  */
 @Component
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class CorsyFilter implements Filter {
 
     @Override
