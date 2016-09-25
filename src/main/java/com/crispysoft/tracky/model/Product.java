@@ -2,16 +2,20 @@ package com.crispysoft.tracky.model;
 
 import org.springframework.data.annotation.Id;
 
+import java.util.Date;
+
 /**
- * Created by kristina on 22.09.2016.
+ * Created by kristina on 25.09.2016.
  */
 public class Product {
     @Id
+    String id;
     String name;
-    Integer ccal;
-    Double p;
-    Double c;
-    Double f;
+    String runame;
+    Double calories;
+    Double protein;
+    Double fat;
+    Double сarbs;
 
     public String getName() {
         return name;
@@ -21,35 +25,51 @@ public class Product {
         this.name = name;
     }
 
-    public Integer getCcal() {
-        return ccal;
+    public String getId() {
+        return id;
     }
 
-    public void setCcal(Integer ccal) {
-        this.ccal = ccal;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public Double getP() {
-        return p;
+    public String getRuname() {
+        return runame;
     }
 
-    public void setP(Double p) {
-        this.p = p;
+    public void setRuname(String runame) {
+        this.runame = runame;
     }
 
-    public Double getC() {
-        return c;
+    public Double getCalories() {
+        return calories;
     }
 
-    public void setC(Double c) {
-        this.c = c;
+    public void setCalories(Double calories) {
+        this.calories = calories;
     }
 
-    public Double getF() {
-        return f;
+    public Double getProtein() {
+        return protein;
     }
 
-    public void setF(Double f) {
-        this.f = f;
+    public void setProtein(Double protein) {
+        this.protein = protein;
+    }
+
+    public Double getFat() {
+        return fat;
+    }
+
+    public void setFat(Double fat) {
+        this.fat = fat;
+    }
+
+    public Double getСarbs() {
+        return сarbs;
+    }
+
+    public void setСarbs(Double сarbs) {
+        this.сarbs = сarbs;
     }
 }
