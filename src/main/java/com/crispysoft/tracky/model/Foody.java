@@ -2,6 +2,7 @@ package com.crispysoft.tracky.model;
 
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 
 import java.util.Date;
 
@@ -12,6 +13,8 @@ public class Foody {
     String person;
     Date date;
     Double weight;
+    @Transient
+    Double calories = 8.0;
 
     public Foody(String name, String person, Date date, Double weight) {
         this.name = name;
@@ -57,6 +60,14 @@ public class Foody {
 
     public Double getWeight() {
         return weight;
+    }
+
+    public Double getCalories() {
+        return calories;
+    }
+
+    public void setCalories(Double calories) {
+        this.calories = calories;
     }
 
     public void setWeight(Double weight) {

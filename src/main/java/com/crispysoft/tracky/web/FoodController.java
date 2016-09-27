@@ -1,11 +1,14 @@
 package com.crispysoft.tracky.web;
 
+import com.crispysoft.tracky.dto.Result;
 import com.crispysoft.tracky.dto.Series;
 import com.crispysoft.tracky.model.Foody;
+import com.crispysoft.tracky.model.Product;
 import com.crispysoft.tracky.model.Tracky;
 import com.crispysoft.tracky.repo.FoodyRepo;
 import com.crispysoft.tracky.repo.PersonProgressRepo;
 import com.crispysoft.tracky.repo.ProductRepo;
+import com.crispysoft.tracky.service.CaloriesCalculator;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.DurationFieldType;
@@ -13,6 +16,7 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,6 +35,16 @@ public class FoodController {
 
     @Autowired
     ProductRepo productRepo;
+
+    @Autowired
+    CaloriesCalculator caloriesCalculator;
+
+    private List<Product> productCache;
+
+    @PostConstruct
+    private void init() {
+        productCache = productRepo.findAll();
+    }
 
     @RequestMapping(value = "/foody", method = RequestMethod.PUT)
     public void putFoody(@RequestBody Foody food) {
@@ -66,7 +80,10 @@ public class FoodController {
 
         List<Foody> foodies = foodyRepo.findByDateAfterAndPerson(date.toDate(), personName);
 
-        Map<String, Double> similarFoodWeight = foodies.stream().collect(Collectors.groupingBy(Foody::getName, Collectors.summingDouble(Foody::getWeight)));
+        Double totalCalories = caloriesCalculator.calculate(foodies, productCache);
+
+        Map<String, Double> similarFoodWeight = foodies.stream().collect(Collectors.groupingBy(Foody::getName, Collectors.summingDouble(Foody::getCalories)));
+
         return similarFoodWeight.entrySet().stream().map(e -> {
             Series series = new Series();
             series.setX(e.getKey());
@@ -134,6 +151,27 @@ public class FoodController {
         }
 
         return result;
+    }
+
+    @RequestMapping(value = "/allProducts", method = RequestMethod.GET)
+    public List<Product> getProducts() {
+        if (productCache == null) {
+            productCache = productRepo.findAll();
+        }
+        return productCache;
+    }
+
+    @RequestMapping(value = "/product", method = RequestMethod.POST)
+    public Result createProduct(@RequestBody Product product) {
+        System.out.println(product);
+//        product.setName("Cottage cheese");
+//        product.setRuname("Зерновой творог");
+//        product.setCalories(98.0);
+//        product.setProtein(11.0);
+//        product.setFat(5.0);
+//        product.setCarbs(3.5);
+        productRepo.save(product);
+        return new Result(true);
     }
 
 }

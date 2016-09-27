@@ -74,7 +74,7 @@ public class ProductUpload {
                             } else if (c == 2) {
                                 info.setFat(cell.getNumericCellValue());
                             } else if (c == 3) {
-                                info.setСarbs(cell.getNumericCellValue());
+                                info.setCarbs(cell.getNumericCellValue());
                             } else if (c == 4) {
                                 info.setCalories(cell.getNumericCellValue());
                             } else if (c == 5) {

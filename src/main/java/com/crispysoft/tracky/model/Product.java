@@ -15,7 +15,7 @@ public class Product {
     Double calories;
     Double protein;
     Double fat;
-    Double сarbs;
+    Double carbs;
 
     public String getName() {
         return name;
@@ -65,11 +65,11 @@ public class Product {
         this.fat = fat;
     }
 
-    public Double getСarbs() {
-        return сarbs;
+    public Double getCarbs() {
+        return carbs;
     }
 
-    public void setСarbs(Double сarbs) {
-        this.сarbs = сarbs;
+    public void setCarbs(Double carbs) {
+        this.carbs = carbs;
     }
 }
