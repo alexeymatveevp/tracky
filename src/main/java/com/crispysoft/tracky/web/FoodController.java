@@ -162,7 +162,7 @@ public class FoodController {
     }
 
     @RequestMapping(value = "/product", method = RequestMethod.POST)
-    public Result createProduct(@RequestBody Product product) {
+    public Result<String> createProduct(@RequestBody Product product) {
         System.out.println(product);
 //        product.setName("Cottage cheese");
 //        product.setRuname("Зерновой творог");
@@ -170,7 +170,19 @@ public class FoodController {
 //        product.setProtein(11.0);
 //        product.setFat(5.0);
 //        product.setCarbs(3.5);
-        productRepo.save(product);
+        Product savedProduct = productRepo.save(product);
+        return new Result<>(true, savedProduct.getId());
+    }
+
+    @RequestMapping(value = "/product", method = RequestMethod.DELETE)
+    public Result deleteProduct(@RequestParam String id) {
+        productRepo.delete(id);
+        return new Result(true);
+    }
+
+    @RequestMapping(value = "/dropProductCache", method = RequestMethod.POST)
+    public Result dropProductCache() {
+        productCache = null;
         return new Result(true);
     }
 
