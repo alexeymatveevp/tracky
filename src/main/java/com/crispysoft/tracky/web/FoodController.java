@@ -66,19 +66,51 @@ public class FoodController {
 
     @RequestMapping(value = "/caloriesChart", method = RequestMethod.GET)
     public List<Series> getCaloriesChartSeries(@RequestParam String personName,
-                                                  @RequestParam(required = false) String type) {
-        DateTime date = new DateTime();
-        if ("day".equals(type) || type == null) {
-            date = date.withHourOfDay(0).withMinuteOfHour(0);
-        } else if ("week".equals(type)) {
-            date = date.withDayOfWeek(1).withHourOfDay(0).withMinuteOfHour(0);
-        } else if ("month".equals(type)) {
-            date = date.withDayOfMonth(1).withHourOfDay(0).withMinuteOfHour(0);
-        } else if ("year".equals(type)) {
-            date = date.withDayOfYear(1).withHourOfDay(0).withMinuteOfHour(0);
-        }
+                                               @RequestParam(required = false) String specificPeriod,
+                                               @RequestParam(required = false) String timestamp) {
 
-        List<Foody> foodies = foodyRepo.findByDateAfterAndPerson(date.toDate(), personName);
+        List<Foody> foodies = null;
+        // high prio parameter
+        if (timestamp != null) {
+            DateTime oneDay = new DateTime(Long.valueOf(timestamp));
+            foodies = foodyRepo.findByDateBetweenAndPerson(oneDay.withTimeAtStartOfDay().toDate(), oneDay.plusDays(1).withTimeAtStartOfDay().toDate(), personName);
+        } else if (specificPeriod != null) {
+            DateTime dateFrom = null;
+            DateTime dateTo = null;
+            if ("today".equals(specificPeriod) || specificPeriod == null) {
+                dateFrom = new DateTime().withTimeAtStartOfDay();
+                dateTo = new DateTime().plusDays(1).withTimeAtStartOfDay();
+            } else if ("yesterday".equals(specificPeriod)) {
+                dateFrom = new DateTime().minusDays(1).withTimeAtStartOfDay();
+                dateTo = new DateTime().withTimeAtStartOfDay();
+            } else if ("week".equals(specificPeriod)) {
+                dateFrom = new DateTime().withDayOfWeek(1).withTimeAtStartOfDay();
+                dateTo = new DateTime().plusWeeks(1).withDayOfWeek(1).withTimeAtStartOfDay();
+            } else if ("lastweek".equals(specificPeriod)) {
+                dateFrom = new DateTime().minusWeeks(1).withDayOfWeek(1).withTimeAtStartOfDay();
+                dateTo = new DateTime().withDayOfWeek(1).withTimeAtStartOfDay();
+            } else if ("month".equals(specificPeriod)) {
+                dateFrom = new DateTime().withDayOfMonth(1).withTimeAtStartOfDay();
+                dateTo = new DateTime().plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay();
+            } else if ("lastmonth".equals(specificPeriod)) {
+                dateFrom = new DateTime().minusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay();
+                dateTo = new DateTime().withDayOfMonth(1).withTimeAtStartOfDay();
+            } else if ("year".equals(specificPeriod)) {
+                dateFrom = new DateTime().withDayOfYear(1).withTimeAtStartOfDay();
+                dateTo = new DateTime().plusYears(1).withDayOfYear(1).withTimeAtStartOfDay();
+            } else if ("lastyear".equals(specificPeriod)) {
+                dateFrom = new DateTime().minusYears(1).withDayOfYear(1).withTimeAtStartOfDay();
+                dateTo = new DateTime().withDayOfYear(1).withTimeAtStartOfDay();
+            }
+            if (dateFrom != null && dateTo != null) {
+                foodies = foodyRepo.findByDateBetweenAndPerson(dateFrom.toDate(), dateTo.toDate(), personName);
+            }
+        } else {
+            // today
+            DateTime dateFrom = new DateTime().withTimeAtStartOfDay();
+            DateTime dateTo = new DateTime().plusDays(1).withTimeAtStartOfDay();
+            foodies = foodyRepo.findByDateBetweenAndPerson(dateFrom.toDate(), dateTo.toDate(), personName);
+        }
 
         Double totalCalories = caloriesCalculator.calculate(foodies, productCache);
 
@@ -132,6 +164,8 @@ public class FoodController {
         }
         Collections.sort(dates);
 
+        caloriesCalculator.calculate(foodies, productCache);
+
         // the chart series example:
         //  [ [ 1136005200000 , 400.0] , [ 1138683600000 , 1345.0] ]
         List<List<Object>> result = new ArrayList<>();
@@ -143,7 +177,7 @@ public class FoodController {
             Double calories = 0.0;
             for (Foody foody : foodies) {
                 if (foody.getDate().after(dt.toDate()) && foody.getDate().before(dtnext.toDate())) {
-                    calories += foody.getWeight();
+                    calories += foody.getCalories();
                 }
             }
             series.add(calories);

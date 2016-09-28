@@ -11,5 +11,6 @@ import java.util.List;
  */
 public interface FoodyRepo extends MongoRepository<Foody, String> {
     List<Foody> findByDateAfterAndPerson(Date date, String person);
+    List<Foody> findByDateBetweenAndPerson(Date date1, Date date2, String person);
     List<Foody> findByPerson(String person);
 }
