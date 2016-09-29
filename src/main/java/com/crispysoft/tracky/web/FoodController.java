@@ -46,12 +46,13 @@ public class FoodController {
         productCache = productRepo.findAll();
     }
 
-    @RequestMapping(value = "/foody", method = RequestMethod.PUT)
-    public void putFoody(@RequestBody Foody food) {
+    @RequestMapping(value = "/foody", method = RequestMethod.POST)
+    public Result<String> saveFoody(@RequestBody Foody food) {
         if (food.getDate()== null) {
             food.setDate(new Date());
         }
-        foodyRepo.save(food);
+        Foody savedFoody = foodyRepo.save(food);
+        return new Result<>(true, savedFoody.getId());
     }
 
     @RequestMapping(value = "/foody", method = RequestMethod.DELETE)
@@ -147,8 +148,8 @@ public class FoodController {
                 maxDate = date;
             }
         }
-        DateTime startDate = new DateTime(minDate);
-        DateTime endDate = new DateTime(maxDate);
+        DateTime startDate = new DateTime(minDate).withTimeAtStartOfDay();
+        DateTime endDate = new DateTime(maxDate).withTimeAtStartOfDay();
         // make a date series with step=1day
         int days = Days.daysBetween(startDate, endDate).getDays();
         List<Long> dates = new ArrayList<>();
