@@ -39,11 +39,13 @@ public class FoodController {
     @Autowired
     CaloriesCalculator caloriesCalculator;
 
+    private List<Foody> foodyCache;
     private List<Product> productCache;
 
     @PostConstruct
     private void init() {
         productCache = productRepo.findAll();
+        foodyCache = foodyRepo.findAll();
     }
 
     @RequestMapping(value = "/foody", method = RequestMethod.POST)
@@ -52,17 +54,82 @@ public class FoodController {
             food.setDate(new Date());
         }
         Foody savedFoody = foodyRepo.save(food);
+        if (foodyCache != null) {
+            Optional<Foody> cachedFoody = foodyCache.stream().filter(f -> f.getId().equals(savedFoody.getId())).findFirst();
+            if (cachedFoody.isPresent()) {
+                // update cache
+                Foody foody = cachedFoody.get();
+                foody.setDate(savedFoody.getDate());
+                foody.setName(savedFoody.getName());
+                foody.setWeight(savedFoody.getWeight());
+                foody.setPerson(savedFoody.getPerson());
+            } else {
+                // add new foody
+                foodyCache.add(savedFoody);
+            }
+        }
         return new Result<>(true, savedFoody.getId());
     }
 
     @RequestMapping(value = "/foody", method = RequestMethod.DELETE)
     public void deleteFoody(@RequestParam String id) {
         foodyRepo.delete(id);
+        if (foodyCache != null) {
+            Optional<Foody> cachedFoody = foodyCache.stream().filter(f -> f.getId().equals(id)).findFirst();
+            if (cachedFoody.isPresent()) {
+                foodyCache.remove(cachedFoody);
+            }
+        }
     }
 
     @RequestMapping(value = "/foodies", method = RequestMethod.GET)
     public List<Foody> getAllFoody() {
-        return foodyRepo.findAll();
+        if (foodyCache == null) {
+            foodyCache = foodyRepo.findAll();
+        }
+        return foodyCache;
+    }
+
+    @RequestMapping(value = "/allProducts", method = RequestMethod.GET)
+    public List<Product> getProducts() {
+        if (productCache == null) {
+            productCache = productRepo.findAll();
+        }
+        return productCache;
+    }
+
+    @RequestMapping(value = "/product", method = RequestMethod.POST)
+    public Result<String> createProduct(@RequestBody Product product) {
+        Product savedProduct = productRepo.save(product);
+        if (productCache != null) {
+            Optional<Product> cachedProduct = productCache.stream().filter(p -> p.getId().equals(savedProduct.getId())).findFirst();
+            if (cachedProduct.isPresent()) {
+                // update cache
+                Product p = cachedProduct.get();
+                p.setName(savedProduct.getName());
+                p.setRuname(savedProduct.getRuname());
+                p.setCalories(savedProduct.getCalories());
+                p.setProtein(savedProduct.getProtein());
+                p.setFat(savedProduct.getFat());
+                p.setCarbs(savedProduct.getCarbs());
+            } else {
+                // put to cache
+                productCache.add(savedProduct);
+            }
+        }
+        return new Result<>(true, savedProduct.getId());
+    }
+
+    @RequestMapping(value = "/product", method = RequestMethod.DELETE)
+    public Result deleteProduct(@RequestParam String id) {
+        productRepo.delete(id);
+        if (productCache != null) {
+            Optional<Product> cachedProduct = productCache.stream().filter(p -> p.getId().equals(id)).findFirst();
+            if (cachedProduct.isPresent()) {
+                productCache.remove(cachedProduct);
+            }
+        }
+        return new Result(true);
     }
 
     @RequestMapping(value = "/caloriesChart", method = RequestMethod.GET)
@@ -188,30 +255,9 @@ public class FoodController {
         return result;
     }
 
-    @RequestMapping(value = "/allProducts", method = RequestMethod.GET)
-    public List<Product> getProducts() {
-        if (productCache == null) {
-            productCache = productRepo.findAll();
-        }
-        return productCache;
-    }
-
-    @RequestMapping(value = "/product", method = RequestMethod.POST)
-    public Result<String> createProduct(@RequestBody Product product) {
-        System.out.println(product);
-//        product.setName("Cottage cheese");
-//        product.setRuname("Зерновой творог");
-//        product.setCalories(98.0);
-//        product.setProtein(11.0);
-//        product.setFat(5.0);
-//        product.setCarbs(3.5);
-        Product savedProduct = productRepo.save(product);
-        return new Result<>(true, savedProduct.getId());
-    }
-
-    @RequestMapping(value = "/product", method = RequestMethod.DELETE)
-    public Result deleteProduct(@RequestParam String id) {
-        productRepo.delete(id);
+    @RequestMapping(value = "/dropFoodyCache", method = RequestMethod.POST)
+    public Result dropFoodyCache() {
+        foodyCache = null;
         return new Result(true);
     }
 
