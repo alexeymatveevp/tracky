@@ -9,6 +9,7 @@ import com.crispysoft.tracky.repo.FoodyRepo;
 import com.crispysoft.tracky.repo.PersonProgressRepo;
 import com.crispysoft.tracky.repo.ProductRepo;
 import com.crispysoft.tracky.service.CaloriesCalculator;
+import com.crispysoft.tracky.util.DF;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.DurationFieldType;
@@ -17,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -50,8 +53,18 @@ public class FoodController {
 
     @RequestMapping(value = "/foody", method = RequestMethod.POST)
     public Result<String> saveFoody(@RequestBody Foody food) {
-        if (food.getDate()== null) {
-            food.setDate(new Date());
+        if (food.getDate() == null) {
+//            try {
+//                food.setDate(DF.df.format(new Date()));
+//            } catch (Throwable e) {
+//                e.printStackTrace();
+//                return new Result<>(false);
+//            }
+            DateTime dt = new DateTime();
+            if (dt.getHourOfDay() > 0 && dt.getHourOfDay() < 5) {
+                dt = dt.withHourOfDay(12).minusDays(1); // -1 day if tracked after midnight
+            }
+            food.setDate(dt.toDate());
         }
         Foody savedFoody = foodyRepo.save(food);
         if (foodyCache != null) {
@@ -135,12 +148,12 @@ public class FoodController {
     @RequestMapping(value = "/caloriesChart", method = RequestMethod.GET)
     public List<Series> getCaloriesChartSeries(@RequestParam String personName,
                                                @RequestParam(required = false) String specificPeriod,
-                                               @RequestParam(required = false) String timestamp) {
+                                               @RequestParam(required = false) String date) {
 
         List<Foody> foodies = null;
         // high prio parameter
-        if (timestamp != null) {
-            DateTime oneDay = new DateTime(Long.valueOf(timestamp));
+        if (date != null) {
+            DateTime oneDay = new DateTime(DF.parseDate(date));
             foodies = foodyRepo.findByDateBetweenAndPerson(oneDay.withTimeAtStartOfDay().toDate(), oneDay.plusDays(1).withTimeAtStartOfDay().toDate(), personName);
         } else if (specificPeriod != null) {
             DateTime dateFrom = null;
@@ -171,6 +184,7 @@ public class FoodController {
                 dateTo = new DateTime().withDayOfYear(1).withTimeAtStartOfDay();
             }
             if (dateFrom != null && dateTo != null) {
+
                 foodies = foodyRepo.findByDateBetweenAndPerson(dateFrom.toDate(), dateTo.toDate(), personName);
             }
         } else {
@@ -198,7 +212,9 @@ public class FoodController {
 
         List<Foody> foodies = foodyRepo.findByPerson(personName);
 
-        List<Date> allDates = foodies.stream().map(Foody::getDate).collect(Collectors.toList());
+        List<Date> allDates = foodies.stream().map(Foody::getDate)
+                .filter(d -> d != null)
+                .collect(Collectors.toList());
         Date minDate = null;
         Date maxDate = null;
         for (Date date : allDates) {
@@ -215,8 +231,8 @@ public class FoodController {
                 maxDate = date;
             }
         }
-        DateTime startDate = new DateTime(minDate).withTimeAtStartOfDay();
-        DateTime endDate = new DateTime(maxDate).withTimeAtStartOfDay();
+        DateTime startDate = new DateTime(minDate).withTimeAtStartOfDay().minusDays(1); // -1 days
+        DateTime endDate = new DateTime(maxDate).withTimeAtStartOfDay().plusDays(1); // +1 days
         // make a date series with step=1day
         int days = Days.daysBetween(startDate, endDate).getDays();
         List<Long> dates = new ArrayList<>();
