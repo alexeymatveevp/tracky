@@ -42,14 +42,8 @@ public class FoodController {
     @Autowired
     CaloriesCalculator caloriesCalculator;
 
-    private List<Foody> foodyCache;
-    private List<Product> productCache;
-
-    @PostConstruct
-    private void init() {
-        productCache = productRepo.findAll();
-        foodyCache = foodyRepo.findAll();
-    }
+    @Autowired
+    private CacheStore cacheStore;
 
     @RequestMapping(value = "/foody", method = RequestMethod.POST)
     public Result<String> saveFoody(@RequestBody Foody food) {
@@ -67,8 +61,8 @@ public class FoodController {
             food.setDate(dt.toDate());
         }
         Foody savedFoody = foodyRepo.save(food);
-        if (foodyCache != null) {
-            Optional<Foody> cachedFoody = foodyCache.stream().filter(f -> f.getId().equals(savedFoody.getId())).findFirst();
+        if (cacheStore.getFoodyCache() != null) {
+            Optional<Foody> cachedFoody = cacheStore.getFoodyCache().stream().filter(f -> f.getId().equals(savedFoody.getId())).findFirst();
             if (cachedFoody.isPresent()) {
                 // update cache
                 Foody foody = cachedFoody.get();
@@ -78,7 +72,7 @@ public class FoodController {
                 foody.setPerson(savedFoody.getPerson());
             } else {
                 // add new foody
-                foodyCache.add(savedFoody);
+                cacheStore.getFoodyCache().add(savedFoody);
             }
         }
         return new Result<>(true, savedFoody.getId());
@@ -87,35 +81,35 @@ public class FoodController {
     @RequestMapping(value = "/foody", method = RequestMethod.DELETE)
     public void deleteFoody(@RequestParam String id) {
         foodyRepo.delete(id);
-        if (foodyCache != null) {
-            Optional<Foody> cachedFoody = foodyCache.stream().filter(f -> f.getId().equals(id)).findFirst();
+        if (cacheStore.getFoodyCache() != null) {
+            Optional<Foody> cachedFoody = cacheStore.getFoodyCache().stream().filter(f -> f.getId().equals(id)).findFirst();
             if (cachedFoody.isPresent()) {
-                foodyCache.remove(cachedFoody);
+                cacheStore.getFoodyCache().remove(cachedFoody);
             }
         }
     }
 
     @RequestMapping(value = "/foodies", method = RequestMethod.GET)
     public List<Foody> getAllFoody() {
-        if (foodyCache == null) {
-            foodyCache = foodyRepo.findAll();
+        if (cacheStore.getFoodyCache() == null) {
+            cacheStore.setFoodyCache(foodyRepo.findAll());
         }
-        return foodyCache;
+        return cacheStore.getFoodyCache();
     }
 
     @RequestMapping(value = "/allProducts", method = RequestMethod.GET)
     public List<Product> getProducts() {
-        if (productCache == null) {
-            productCache = productRepo.findAll();
+        if (cacheStore.getProductCache() == null) {
+            cacheStore.setProductCache(productRepo.findAll());
         }
-        return productCache;
+        return cacheStore.getProductCache();
     }
 
     @RequestMapping(value = "/product", method = RequestMethod.POST)
     public Result<String> createProduct(@RequestBody Product product) {
         Product savedProduct = productRepo.save(product);
-        if (productCache != null) {
-            Optional<Product> cachedProduct = productCache.stream().filter(p -> p.getId().equals(savedProduct.getId())).findFirst();
+        if (cacheStore.getProductCache() != null) {
+            Optional<Product> cachedProduct = cacheStore.getProductCache().stream().filter(p -> p.getId().equals(savedProduct.getId())).findFirst();
             if (cachedProduct.isPresent()) {
                 // update cache
                 Product p = cachedProduct.get();
@@ -127,7 +121,7 @@ public class FoodController {
                 p.setCarbs(savedProduct.getCarbs());
             } else {
                 // put to cache
-                productCache.add(savedProduct);
+                cacheStore.getProductCache().add(savedProduct);
             }
         }
         return new Result<>(true, savedProduct.getId());
@@ -136,10 +130,10 @@ public class FoodController {
     @RequestMapping(value = "/product", method = RequestMethod.DELETE)
     public Result deleteProduct(@RequestParam String id) {
         productRepo.delete(id);
-        if (productCache != null) {
-            Optional<Product> cachedProduct = productCache.stream().filter(p -> p.getId().equals(id)).findFirst();
+        if (cacheStore.getProductCache() != null) {
+            Optional<Product> cachedProduct = cacheStore.getProductCache().stream().filter(p -> p.getId().equals(id)).findFirst();
             if (cachedProduct.isPresent()) {
-                productCache.remove(cachedProduct);
+                cacheStore.getProductCache().remove(cachedProduct.get());
             }
         }
         return new Result(true);
@@ -194,7 +188,7 @@ public class FoodController {
             foodies = foodyRepo.findByDateBetweenAndPerson(dateFrom.toDate(), dateTo.toDate(), personName);
         }
 
-        Double totalCalories = caloriesCalculator.calculate(foodies, productCache);
+        Double totalCalories = caloriesCalculator.calculate(foodies, cacheStore.getProductCache());
 
         Map<String, Double> similarFoodWeight = foodies.stream().collect(Collectors.groupingBy(Foody::getName, Collectors.summingDouble(Foody::getCalories)));
 
@@ -248,7 +242,7 @@ public class FoodController {
         }
         Collections.sort(dates);
 
-        caloriesCalculator.calculate(foodies, productCache);
+        caloriesCalculator.calculate(foodies, cacheStore.getProductCache());
 
         // the chart series example:
         //  [ [ 1136005200000 , 400.0] , [ 1138683600000 , 1345.0] ]
@@ -273,13 +267,13 @@ public class FoodController {
 
     @RequestMapping(value = "/dropFoodyCache", method = RequestMethod.POST)
     public Result dropFoodyCache() {
-        foodyCache = null;
+        cacheStore.setFoodyCache(null);
         return new Result(true);
     }
 
     @RequestMapping(value = "/dropProductCache", method = RequestMethod.POST)
     public Result dropProductCache() {
-        productCache = null;
+        cacheStore.setProductCache(null);
         return new Result(true);
     }
 
